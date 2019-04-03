@@ -1,11 +1,11 @@
 ﻿using System;
 using Common;
-using System.Net.Sockets;
 using System.IO;
+using System.Net.Sockets;
 using Common.NDatabase.FileData;
 using YobiApp.NDatabase.AppData;
-using YobiApp.Functional.FileWork;
 using System.Collections.Generic;
+using YobiApp.Functional.FileWork;
 
 namespace YobiApp.Functional.Upload
 {
@@ -22,9 +22,12 @@ namespace YobiApp.Functional.Upload
                 {
                     FileD file = files[0];
                     string app_hash = Worker.uploader.GenerateHash(8);
+                    file.file_path = Worker.uploader.Full_Path_Upload + app_hash + "/";
+                    file.file_name = file.file_last_name;
                     if (file.file_type == "application")
                     {
-                        Directory.CreateDirectory(Worker.uploader.Full_Path_Upload + app_hash);
+                        Directory.CreateDirectory(file.file_path);
+                        LoaderFile.CreateFileBinary(file.file_path + file.file_name, ref file.buffer);
                         App app = null;
                         switch(file.file_extension)
                         {
@@ -66,6 +69,10 @@ namespace YobiApp.Functional.Upload
                         }
                         Database.app.Add(app);
                     }
+                    else
+                    {
+                        Worker.JsonAnswer(false, "Wrong type of file.", ref remoteSocket);
+                    }
                 }
                 else
                 {
@@ -86,16 +93,19 @@ namespace YobiApp.Functional.Upload
             int? user_id = Worker.FindParamFromRequest(ref request, "user_id", TypeCode.Int32);
             if (user_id == null)
             {
-                Worker.JsonAnswer(false, "Can not find id in this request params", ref remoteSocket);
+                Worker.JsonAnswer(false, "Can not find id in this request params.", ref remoteSocket);
+                return;
             }
             if (Database.user.SelectId(user_id) == null)
             {
-                Worker.JsonAnswer(false, "Can not find user with this user_id", ref remoteSocket);
+                Worker.JsonAnswer(false, "Can not find user with this user_id.", ref remoteSocket);
+                return;
             }
             List<App> apps = Database.app.SelectByUserId(user_id);
             if (apps.Count == 0)
             {
                 Worker.JsonAnswer(false, "This user doesn't has any builds.", ref remoteSocket);
+                return;
             }
             Worker.JsonData(apps, ref remoteSocket);
         }
@@ -105,11 +115,13 @@ namespace YobiApp.Functional.Upload
             if (hash == null)
             {
                 Worker.JsonAnswer(false, "Can not find hash in this request params.", ref remoteSocket);
+                return;
             }
             App app = Database.app.SelectByHash(hash);
             if (app == null)
             {
                 Worker.JsonAnswer(false, "Can not find application by this hash.", ref remoteSocket);
+                return;
             }
             FileD file = Database.file.SelectById(app.app_id);
             if (file != null)
@@ -125,11 +137,13 @@ namespace YobiApp.Functional.Upload
             if (app_hash == null)
             {
                 Worker.JsonAnswer(false, "Can not find hash in request =" + app_hash, ref remoteSocket);
+                return;
             }
             App app = Database.app.SelectByHash(app_hash);
             if (app == null)
             {
                 Worker.JsonAnswer(false, "Can not find application by hash =" + app_hash, ref remoteSocket);
+                return;
             }
             Worker.JsonData(app, ref remoteSocket);
         }

@@ -7,37 +7,38 @@ namespace YobiApp.NDatabase.AppData
 {
     public class AppStorage : Storage
     {
-        public string table = "CREATE TABLE IF NOT EXISTS apps" +
-        "(" +
-            "app_id int AUTO_INCREMENT," +
-            "app_uid int," +
-            "app_hash varchar(20)," +
-            "install_link varchar(256)," +
-            "archive_name varchar(256)," +
-            "url_manifest varchar(256)," +
-            "app_name varchar(256)," +
-            "url_icon varchar(256)," +
-            "version varchar(10)," +
-            "build varchar(10)," +
-            "bundleIdentifier varchar(256)" +
-            "created_at int," +
-            "PRIMARY KEY (app_id)" +
-        ")";
-        public string table_name = "apps";
-
-        public string insert = "INSERT INTO apps(app_uid, app_hash, install_link, archive_name, url_manifest, app_name, url_icon, version, build, bundleIdentifier, created_at)" +
-            "VALUES (@app_uid, @app_hash, @install_link, @archive_name, @url_manifest, @app_name, @url_icon, @version, @build, @bundleIdentifier, @created_at);";
 
         public AppStorage(MySqlConnection connection, object locker)
         {
             this.connection = connection;
             this.locker = locker;
-            SetTable(table);
-            SetTableName(table_name);
+            SetTable
+            (
+                "CREATE TABLE IF NOT EXISTS apps" +
+            "(" +
+                "app_id int AUTO_INCREMENT," +
+                "app_uid int," +
+                "app_hash varchar(20)," +
+                "install_link varchar(256)," +
+                "archive_name varchar(256)," +
+                "url_manifest varchar(256)," +
+                "app_name varchar(256)," +
+                "url_icon varchar(256)," +
+                "version varchar(10)," +
+                "build varchar(10)," +
+                "bundleIdentifier varchar(256)," +
+                "created_at int," +
+                "PRIMARY KEY (app_id)" +
+            ");"
+            );
+            SetTableName("apps");
         }
         public App Add(App app)
         {
-            using (MySqlCommand commandSQL = new MySqlCommand(insert, connection))
+            using (MySqlCommand commandSQL = new MySqlCommand(
+            "INSERT INTO apps(app_uid, app_hash, install_link, archive_name, url_manifest, app_name, url_icon, version, build, bundleIdentifier, created_at)" +
+            "VALUES (@app_uid, @app_hash, @install_link, @archive_name, @url_manifest, @app_name, @url_icon, @version, @build, @bundleIdentifier, @created_at);"
+            , connection))
             {
                 lock (locker)
                 {

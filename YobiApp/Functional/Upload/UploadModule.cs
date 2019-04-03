@@ -19,7 +19,7 @@ namespace YobiApp.Functional.Upload
         private string Full_Path_Plist = "";
         private string Path_Relative_Plist = "/Plist/";
         public  string Full_Path_Upload = "";
-        private string Path_Relative_Upload = "/Files/Upload/";
+        private string Path_Relative_Upload = "/files/Upload/";
         private string KeyValueSet = "(?<=<string>)(.*)(?=</string>)";
         private string CurrentDirectory = "";
         private string Domen = "";
@@ -63,6 +63,7 @@ namespace YobiApp.Functional.Upload
             ipa.archive_name = file.file_name;
             ipa.url_manifest = "http://" + Domen + "/YobiApp" + Path_Relative_Upload + ipa.app_hash + "/" + ipa.archive_name;
             ipa.install_link = "itms-services://?action=download-manifest&url=https://" + Ssl_Domen + "/Plist/" + ipa.app_hash + ".plist";
+            ipa.created_at = (int)(DateTime.UtcNow - new DateTime(1970, 0, 0, 1, 1, 1)).TotalSeconds;
             if (!CreateInstallPlist(ipa)) { return null; }
             Logger.WriteLog("Uploaded Ipa file. Hash=" + hash, LogLevel.Usual);
             return ipa;
@@ -188,7 +189,7 @@ namespace YobiApp.Functional.Upload
             DirectoryInfo directory = Directory.CreateDirectory(pathAPK);
             try
             {
-                ZipFile.ExtractToDirectory(file.file_path + file.file_name, pathAPK);
+                ZipFile.ExtractToDirectory(file.file_path + file.file_last_name, pathAPK);
             }
             catch (Exception)
             {
@@ -197,11 +198,12 @@ namespace YobiApp.Functional.Upload
             }
             App apk = new App
             {
-                app_id = file.file_id,               
+                app_id = file.file_id,
                 app_hash = hash,
                 archive_name = file.file_last_name,
                 url_manifest = "http://" + Domen + "/YobiApp" + Path_Relative_Upload + hash + "/" + file.file_name,
-                install_link = "http://" + Domen + "/YobiApp" + Path_Relative_Upload + hash + "/" + file.file_name    
+                install_link = "http://" + Domen + "/YobiApp" + Path_Relative_Upload + hash + "/" + file.file_name,
+                created_at = (int)(DateTime.UtcNow - new DateTime(1970, 0, 0, 1, 1, 1)).TotalSeconds
             };
             Logger.WriteLog("Uploaded APK file. Hash=" + hash, LogLevel.Usual);
             return apk;

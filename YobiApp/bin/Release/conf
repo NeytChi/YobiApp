@@ -1,7 +1,9 @@
 {
-	"ip" : "127.0.0.1",
-	"domen" : "gbt.yobidev.com",
+	"ip" : "192.168.1.215",
+	"domen" : "(none)",
 	"port" : 8000,
-	"ssl_path" : "/home/neytchi/Projects/YobiApp/YobiApp/bin/Release",
-	"ssl_domen" : "yobidev.com"
+	"ssl_path" : "/home/neytchi",
+	"ssl_domen" : "yobidev.com",
+	"mail_address" : "test6574839210@gmail.com", 
+	"mail_password" : "GmailPassword1234"
 }

@@ -32,7 +32,7 @@ namespace Common
         }
         public static void JsonRequest(ref string json, ref Socket remoteSocket)
         {
-            if (string.IsNullOrEmpty(json))
+            if (!string.IsNullOrEmpty(json))
             {
                 string response = "HTTP/1.1 200\r\n";
                 response += "Version: HTTP/1.1\r\n";
@@ -52,7 +52,7 @@ namespace Common
         }
         public static void ErrorJsonRequest(ref string json, ref Socket remoteSocket)
         {
-            if (string.IsNullOrEmpty(json))
+            if (!string.IsNullOrEmpty(json))
             {
                 string response = "HTTP/1.1 500\r\n";
                 response += "Version: HTTP/1.1\r\n";

@@ -20,8 +20,6 @@ namespace Common.NDatabase.FileData
         private string insert = "INSERT INTO files(file_path, file_name, file_type, file_extension)" +
             "VALUES ( @file_path, @file_name, @file_type, @file_extension)";
 
-        private string selectbyid = "SELECT * FROM files WHERE file_id=@file_id";
-
         public FileStorage(MySqlConnection connection, object locker)
         {
             this.connection = connection;
@@ -54,8 +52,9 @@ namespace Common.NDatabase.FileData
         {
             lock (locker)
             {
-                using (MySqlCommand sqlCommand = new MySqlCommand(selectbyid, connection))
+                using (MySqlCommand sqlCommand = new MySqlCommand("SELECT * FROM files WHERE file_id=@file_id", connection))
                 {
+                    sqlCommand.Parameters.AddWithValue("@file_id", file_id);
                     using (MySqlDataReader reader = sqlCommand.ExecuteReader())
                     {
                         if (reader.Read())

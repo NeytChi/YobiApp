@@ -923,6 +923,19 @@
             <paramref name="certificate"/> is <c>null</c>.
             </exception>
         </member>
+        <member name="M:MimeKit.Cryptography.BouncyCastleCertificateExtensions.GetPublicKeyAlgorithm(Org.BouncyCastle.X509.X509Certificate)">
+            <summary>
+            Gets the public key algorithm for the certificate.
+            </summary>
+            <remarks>
+            Gets the public key algorithm for the ceretificate.
+            </remarks>
+            <returns>The public key algorithm.</returns>
+            <param name="certificate">The certificate.</param>
+            <exception cref="T:System.ArgumentNullException">
+            <paramref name="certificate"/> is <c>null</c>.
+            </exception>
+        </member>
         <member name="M:MimeKit.Cryptography.BouncyCastleCertificateExtensions.GetKeyUsageFlags(Org.BouncyCastle.X509.X509Certificate)">
             <summary>
             Gets the key usage flags.
@@ -7679,6 +7692,19 @@
             An S/MIME digital signature.
             </remarks>
         </member>
+        <member name="M:MimeKit.Cryptography.SecureMimeDigitalSignature.#ctor(Org.BouncyCastle.Cms.SignerInformation,Org.BouncyCastle.X509.X509Certificate)">
+            <summary>
+            Initializes a new instance of the <see cref="T:MimeKit.Cryptography.SecureMimeDigitalSignature"/> class.
+            </summary>
+            <remarks>
+            Creates a new <see cref="T:MimeKit.Cryptography.SecureMimeDigitalSignature"/>.
+            </remarks>
+            <param name="signerInfo">The information about the signer.</param>
+            <param name="certificate">The signer's certificate.</param>
+            <exception cref="T:System.ArgumentNullException">
+            <paramref name="signerInfo"/> is <c>null</c>.
+            </exception>
+        </member>
         <member name="P:MimeKit.Cryptography.SecureMimeDigitalSignature.SignerInfo">
             <summary>
             Gets the signer info.
@@ -9040,6 +9066,19 @@
             Converts an X509Certificate2 into a BouncyCastle X509Certificate.
             </remarks>
             <returns>The bouncy castle certificate.</returns>
+            <param name="certificate">The certificate.</param>
+            <exception cref="T:System.ArgumentNullException">
+            <paramref name="certificate"/> is <c>null</c>.
+            </exception>
+        </member>
+        <member name="M:MimeKit.Cryptography.X509Certificate2Extensions.GetPublicKeyAlgorithm(System.Security.Cryptography.X509Certificates.X509Certificate2)">
+            <summary>
+            Gets the public key algorithm for the certificate.
+            </summary>
+            <remarks>
+            Gets the public key algorithm for the ceretificate.
+            </remarks>
+            <returns>The public key algorithm.</returns>
             <param name="certificate">The certificate.</param>
             <exception cref="T:System.ArgumentNullException">
             <paramref name="certificate"/> is <c>null</c>.
@@ -21982,6 +22021,11 @@
             The MAPI property PR_REPLY_RECIPIENT_NAMES.
             </summary>
         </member>
+        <member name="F:MimeKit.Tnef.TnefPropertyId.ReplyRecipientSmtpProxies">
+            <summary>
+            The MAPI property PR_REPLY_RECIPIENT_SMTP_PROXIES.
+            </summary>
+        </member>
         <member name="F:MimeKit.Tnef.TnefPropertyId.ReplyRequested">
             <summary>
             The MAPI property PR_REPLY_REQUESTED.
@@ -22162,6 +22206,11 @@
             The MAPI property PR_SENDER_SEARCH_KEY.
             </summary>
         </member>
+        <member name="F:MimeKit.Tnef.TnefPropertyId.SenderSimpleDispName">
+            <summary>
+            The MAPI property PR_SENDER_SIMPLE_DISP_NAME.
+            </summary>
+        </member>
         <member name="F:MimeKit.Tnef.TnefPropertyId.SendInternetEncoding">
             <summary>
             The MAPI property PR_SEND_INTERNET_ENCODING.
@@ -22210,6 +22259,11 @@
         <member name="F:MimeKit.Tnef.TnefPropertyId.SentRepresentingSearchKey">
             <summary>
             The MAPI property PR_SENT_REPRESENTING_SEARCH_KEY.
+            </summary>
+        </member>
+        <member name="F:MimeKit.Tnef.TnefPropertyId.SentRepresentingSimpleDispName">
+            <summary>
+            The MAPI property PR_SENT_REPRESENTING_SIMPLE_DISP_NAME.
             </summary>
         </member>
         <member name="F:MimeKit.Tnef.TnefPropertyId.ServiceDeleteFiles">
@@ -22854,6 +22908,21 @@
             Reads any string or binary blob values as a string.
             </remarks>
             <returns>The value as a string.</returns>
+            <exception cref="T:System.InvalidOperationException">
+            There are no more values to read or the value could not be read as a string.
+            </exception>
+            <exception cref="T:System.IO.EndOfStreamException">
+            The TNEF stream is truncated and the value could not be read.
+            </exception>
+        </member>
+        <member name="M:MimeKit.Tnef.TnefPropertyReader.ReadValueAsUri">
+            <summary>
+            Reads the value as a Uri.
+            </summary>
+            <remarks>
+            Reads any string or binary blob values as a Uri.
+            </remarks>
+            <returns>The value as a Uri.</returns>
             <exception cref="T:System.InvalidOperationException">
             There are no more values to read or the value could not be read as a string.
             </exception>
@@ -28790,7 +28859,7 @@
             A stream for reading raw values from a <see cref="T:MimeKit.Tnef.TnefReader"/> or <see cref="T:MimeKit.Tnef.TnefPropertyReader"/>.
             </remarks>
         </member>
-        <member name="M:MimeKit.Tnef.TnefReaderStream.#ctor(MimeKit.Tnef.TnefReader,System.Int32)">
+        <member name="M:MimeKit.Tnef.TnefReaderStream.#ctor(MimeKit.Tnef.TnefReader,System.Int32,System.Int32)">
             <summary>
             Initializes a new instance of the <see cref="T:MimeKit.Tnef.TnefReaderStream"/> class.
             </summary>
@@ -28798,7 +28867,8 @@
             Creates a stream for reading a raw value from the <see cref="T:MimeKit.Tnef.TnefReader"/>.
             </remarks>
             <param name="tnefReader">The <see cref="T:MimeKit.Tnef.TnefReader"/>.</param>
-            <param name="endOffset">The end offset.</param>
+            <param name="dataEndOffset">The end offset of the data.</param>
+            <param name="valueEndOffset">The end offset of the container value.</param>
         </member>
         <member name="P:MimeKit.Tnef.TnefReaderStream.CanRead">
             <summary>
@@ -32819,9 +32889,19 @@
             comparing strings.
             </remarks>
         </member>
+        <member name="F:MimeKit.HeaderId.AcceptLanguage">
+            <summary>
+            The Accept-Language header field.
+            </summary>
+        </member>
         <member name="F:MimeKit.HeaderId.AdHoc">
             <summary>
             The Ad-Hoc header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.AlternateRecipient">
+            <summary>
+            The Alternate-Recipient header field.
             </summary>
         </member>
         <member name="F:MimeKit.HeaderId.ApparentlyTo">
@@ -32834,14 +32914,84 @@
             The Approved header field.
             </summary>
         </member>
+        <member name="F:MimeKit.HeaderId.ArcAuthenticationResults">
+            <summary>
+            The ARC-Authentication-Results header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.ArcMessageSignature">
+            <summary>
+            The ARC-Message-Signature header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.ArcSeal">
+            <summary>
+            The ARC-Seal header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.Archive">
+            <summary>
+            The Archive header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.ArchivedAt">
+            <summary>
+            The Archived-At header field.
+            </summary>
+        </member>
         <member name="F:MimeKit.HeaderId.Article">
             <summary>
             The Article header field.
             </summary>
         </member>
+        <member name="F:MimeKit.HeaderId.AuthenticationResults">
+            <summary>
+            The Authentication-Results header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.Autocrypt">
+            <summary>
+            The Autocrypt header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.AutocryptGossip">
+            <summary>
+            The Autocrypt-Gossip header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.AutocryptSetupMessage">
+            <summary>
+            The Autocrypt-Setup-Message header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.Autoforwarded">
+            <summary>
+            The Autoforwarded header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.AutoSubmitted">
+            <summary>
+            The Auto-Submitted header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.Autosubmitted">
+            <summary>
+            The Autosubmitted header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.Base">
+            <summary>
+            The Base header field.
+            </summary>
+        </member>
         <member name="F:MimeKit.HeaderId.Bcc">
             <summary>
             The Bcc header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.Body">
+            <summary>
+            The Body header field.
             </summary>
         </member>
         <member name="F:MimeKit.HeaderId.Bytes">
@@ -32857,6 +33007,11 @@
         <member name="F:MimeKit.HeaderId.Comments">
             <summary>
             The Comments header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.ContentAlternative">
+            <summary>
+            The Content-Alternative header field.
             </summary>
         </member>
         <member name="F:MimeKit.HeaderId.ContentBase">
@@ -32884,9 +33039,19 @@
             The Content-Duration header field.
             </summary>
         </member>
+        <member name="F:MimeKit.HeaderId.ContentFeatures">
+            <summary>
+            The Content-Features header field.
+            </summary>
+        </member>
         <member name="F:MimeKit.HeaderId.ContentId">
             <summary>
             The Content-Id header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.ContentIdentifier">
+            <summary>
+            The Content-Identifier header field.
             </summary>
         </member>
         <member name="F:MimeKit.HeaderId.ContentLanguage">
@@ -32909,9 +33074,19 @@
             The Content-Md5 header field.
             </summary>
         </member>
+        <member name="F:MimeKit.HeaderId.ContentReturn">
+            <summary>
+            The Content-Return header field.
+            </summary>
+        </member>
         <member name="F:MimeKit.HeaderId.ContentTransferEncoding">
             <summary>
             The Content-Transfer-Encoding header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.ContentTranslationType">
+            <summary>
+            The Content-Translation-Type header field.
             </summary>
         </member>
         <member name="F:MimeKit.HeaderId.ContentType">
@@ -32924,14 +33099,39 @@
             The Control header field.
             </summary>
         </member>
+        <member name="F:MimeKit.HeaderId.Conversion">
+            <summary>
+            The Conversion header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.ConversionWithLoss">
+            <summary>
+            The Conversion-With-Loss header field.
+            </summary>
+        </member>
         <member name="F:MimeKit.HeaderId.Date">
             <summary>
             The Date header field.
             </summary>
         </member>
+        <member name="F:MimeKit.HeaderId.DateReceived">
+            <summary>
+            The Date-Received header field.
+            </summary>
+        </member>
         <member name="F:MimeKit.HeaderId.DeferredDelivery">
             <summary>
             The Deferred-Delivery header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.DeliveryDate">
+            <summary>
+            The Delivery-Date header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.DiscloseRecipients">
+            <summary>
+            The Disclose-Recipients header field.
             </summary>
         </member>
         <member name="F:MimeKit.HeaderId.DispositionNotificationOptions">
@@ -32989,9 +33189,24 @@
             The From header field.
             </summary>
         </member>
+        <member name="F:MimeKit.HeaderId.GenerateDeliveryReport">
+            <summary>
+            The Generate-Delivery-Report header field.
+            </summary>
+        </member>
         <member name="F:MimeKit.HeaderId.Importance">
             <summary>
             The Importance header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.InjectionDate">
+            <summary>
+            The Injection-Date header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.InjectionInfo">
+            <summary>
+            The Injection-Info header field.
             </summary>
         </member>
         <member name="F:MimeKit.HeaderId.InReplyTo">
@@ -33004,14 +33219,44 @@
             The Keywords header field.
             </summary>
         </member>
+        <member name="F:MimeKit.HeaderId.Language">
+            <summary>
+            The Language header.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.LatestDeliveryTime">
+            <summary>
+            The Latest-Delivery-Time header.
+            </summary>
+        </member>
         <member name="F:MimeKit.HeaderId.Lines">
             <summary>
             The Lines header field.
             </summary>
         </member>
+        <member name="F:MimeKit.HeaderId.ListArchive">
+            <summary>
+            THe List-Archive header field.
+            </summary>
+        </member>
         <member name="F:MimeKit.HeaderId.ListHelp">
             <summary>
             The List-Help header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.ListId">
+            <summary>
+            The List-Id header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.ListOwner">
+            <summary>
+            The List-Owner header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.ListPost">
+            <summary>
+            The List-Post header field.
             </summary>
         </member>
         <member name="F:MimeKit.HeaderId.ListSubscribe">
@@ -33022,6 +33267,11 @@
         <member name="F:MimeKit.HeaderId.ListUnsubscribe">
             <summary>
             The List-Unsubscribe header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.ListUnsubscribePost">
+            <summary>
+            The List-Unsubscribe-Post header field.
             </summary>
         </member>
         <member name="F:MimeKit.HeaderId.MessageId">
@@ -33049,9 +33299,29 @@
             The Organization header field.
             </summary>
         </member>
+        <member name="F:MimeKit.HeaderId.OriginalFrom">
+            <summary>
+            The Original-From header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.OriginalMessageId">
+            <summary>
+            The Original-Message-Id header field.
+            </summary>
+        </member>
         <member name="F:MimeKit.HeaderId.OriginalRecipient">
             <summary>
             The Original-Recipient header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.OriginalReturnAddress">
+            <summary>
+            The Original-Return-Address header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.OriginalSubject">
+            <summary>
+            The Original-Subject header field.
             </summary>
         </member>
         <member name="F:MimeKit.HeaderId.Path">
@@ -33064,6 +33334,11 @@
             The Precedence header field.
             </summary>
         </member>
+        <member name="F:MimeKit.HeaderId.PreventNonDeliveryReport">
+            <summary>
+            The Prevent-NonDelivery-Report header field.
+            </summary>
+        </member>
         <member name="F:MimeKit.HeaderId.Priority">
             <summary>
             The Priority header field.
@@ -33074,9 +33349,19 @@
             The Received header field.
             </summary>
         </member>
+        <member name="F:MimeKit.HeaderId.ReceivedSPF">
+            <summary>
+            The Received-SPF header field.
+            </summary>
+        </member>
         <member name="F:MimeKit.HeaderId.References">
             <summary>
             The References header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.RelayVersion">
+            <summary>
+            The Relay-Version header field.
             </summary>
         </member>
         <member name="F:MimeKit.HeaderId.ReplyBy">
@@ -33087,6 +33372,11 @@
         <member name="F:MimeKit.HeaderId.ReplyTo">
             <summary>
             The Reply-To header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.RequireRecipientValidSince">
+            <summary>
+            The Require-Recipient-Valid-Since header field.
             </summary>
         </member>
         <member name="F:MimeKit.HeaderId.ResentBcc">
@@ -33139,6 +33429,11 @@
             The Return-Receipt-To header field.
             </summary>
         </member>
+        <member name="F:MimeKit.HeaderId.SeeAlso">
+            <summary>
+            The See-Also header field.
+            </summary>
+        </member>
         <member name="F:MimeKit.HeaderId.Sender">
             <summary>
             The Sender header field.
@@ -33147,6 +33442,11 @@
         <member name="F:MimeKit.HeaderId.Sensitivity">
             <summary>
             The Sensitivity header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.Solicitation">
+            <summary>
+            The Solicitation header field.
             </summary>
         </member>
         <member name="F:MimeKit.HeaderId.Status">
@@ -33177,6 +33477,46 @@
         <member name="F:MimeKit.HeaderId.UserAgent">
             <summary>
             The User-Agent header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.X400ContentIdentifier">
+            <summary>
+            The X400-Content-Identifier header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.X400ContentReturn">
+            <summary>
+            The X400-Content-Return header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.X400ContentType">
+            <summary>
+            The X400-Content-Type header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.X400MTSIdentifier">
+            <summary>
+            The X400-MTS-Identifier header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.X400Originator">
+            <summary>
+            The X400-Originator header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.X400Received">
+            <summary>
+            The X400-Received header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.X400Recipients">
+            <summary>
+            The X400-Recipients header field.
+            </summary>
+        </member>
+        <member name="F:MimeKit.HeaderId.X400Trace">
+            <summary>
+            The X400-Trace header field.
             </summary>
         </member>
         <member name="F:MimeKit.HeaderId.XMailer">
@@ -41898,15 +42238,25 @@
             </remarks>
             <value>The RFC compliance mode.</value>
         </member>
+        <member name="P:MimeKit.ParserOptions.AllowUnquotedCommasInAddresses">
+            <summary>
+            Gets or sets whether the rfc822 address parser should ignore unquoted commas in address names.
+            </summary>
+            <remarks>
+            <para>In general, you'll probably want this value to be <c>true</c> (the default) as it allows
+            maximum interoperability with existing (broken) mail clients and other mail software such as
+            sloppily written perl scripts (aka spambots) that do not properly quote the name when it
+            contains a comma.</para>
+            </remarks>
+            <value><c>true</c> if the address parser should ignore unquoted commas in address names; otherwise, <c>false</c>.</value>
+        </member>
         <member name="P:MimeKit.ParserOptions.AllowAddressesWithoutDomain">
             <summary>
             Gets or sets whether the rfc822 address parser should allow addresses without a domain.
             </summary>
             <remarks>
-            <para>In general, you'll probably want this value to be <c>false</c> (the default) as it allows 
-            maximum interoperability with existing (broken) mail clients and other mail software such as
-            sloppily written perl scripts (aka spambots) that do not properly quote the name when it
-            contains a comma.</para>
+            <para>In general, you'll probably want this value to be <c>true</c> (the default) as it allows
+            maximum interoperability with older email messages that may contain local UNIX addresses.</para>
             <para>This option exists in order to allow parsing of mailbox addresses that do not have an
             @domain component. These types of addresses are rare and were typically only used when sending
             mail to other users on the same UNIX system.</para>

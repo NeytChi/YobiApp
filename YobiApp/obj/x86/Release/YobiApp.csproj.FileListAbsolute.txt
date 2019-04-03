@@ -18,3 +18,5 @@
 /home/neytchi/Projects/YobiApp/YobiApp/bin/Release/MimeKit.dll
 /home/neytchi/Projects/YobiApp/YobiApp/bin/Release/MimeKit.xml
 /home/neytchi/Projects/YobiApp/YobiApp/bin/Release/MailKit.xml
+/home/neytchi/Projects/YobiApp/YobiApp/bin/Release/Google.Protobuf.pdb
+/home/neytchi/Projects/YobiApp/YobiApp/bin/Release/Newtonsoft.Json.pdb

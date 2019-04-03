@@ -5,7 +5,6 @@ using System.Threading;
 using System.Net.Sockets;
 using System.Diagnostics;
 using Newtonsoft.Json.Linq;
-using YobiApp.Functional.Tasker;
 using System.Text.RegularExpressions;
 
 namespace Common
@@ -17,12 +16,7 @@ namespace Common
         public static string domen = "(none)";
         private static Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         private static Regex contentlength = new Regex("ength: [0-9]*", RegexOptions.Compiled);
-        private static readonly string[] methods =
-        {
-            "GET",
-            "POST",
-            "OPTIONS"
-        };
+
         public static void InitListenSocket()
         {
             IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
@@ -92,53 +86,56 @@ namespace Common
             }
             if (handleSocket.Connected) { handleSocket.Close(); }
         }
-        private static void IdentifyRequest(ref string request,ref Socket handleSocket,ref byte[] buffer,ref int bytes)
+        private static void IdentifyRequest(ref string request, ref Socket handleSocket, ref byte[] buffer, ref int bytes)
         {
             Debug.WriteLine("Request:");
             Debug.WriteLine(request);
             switch (GetMethodRequest(ref request))
             {
                 case "GET":
-                    HandleGetRequest(ref request,ref handleSocket);
+                    HandleGetRequest(ref request, ref handleSocket);
                     break;
                 case "POST":
                     JObject json = null;
-                    switch (FindURLRequest(ref request, "POST").ToLower())
+                    string url = FindURLRequest(ref request, "POST");
+                    if (url != null)
                     {
-                        case "registration":
-                            json = Worker.GetJsonFromRequest(ref request);
-                            Worker.auth.Registration(ref json, ref handleSocket);
-                            break;
-                        case "login":
-                            json = Worker.GetJsonFromRequest(ref request);
-                            Worker.auth.Login(ref json, ref handleSocket);
-                            break;
-                        case "recovery":
-                            Worker.auth.Recovery(ref request, ref handleSocket);
-                            break;
-                        case "newpassword": case "newpass":
-                            json = Worker.GetJsonFromRequest(ref request);
-                            Worker.auth.ChangePassword(ref json, ref handleSocket);
-                            break;
-                        case "account/delete":
-                            Worker.auth.DeleteAccount(ref request, ref handleSocket);
-                            break;
-                        case "upload":
-                            json = Worker.GetJsonFromRequest(ref request);
-                            Worker.upload.UploadBuild(ref request, ref buffer, ref bytes, ref handleSocket);
-                            break;
-                        case "app":
-                            Worker.upload.SelectApp(ref request, ref handleSocket);
-                            break;
-                        case "app/select_all":
-                            Worker.upload.SelectMassApps(ref request, ref handleSocket);
-                            break;
-                        case "app/delete":
-                            Worker.upload.DeleteApp(ref request, ref handleSocket);
-                            break;
-                        default:
-                            HttpErrorUrl(ref handleSocket);
-                            break;
+                        url = url.ToLower();
+                        switch (url)
+                        {
+                            case "registration":
+                                json = Worker.GetJsonFromRequest(ref request);
+                                Worker.auth.Registration(ref json, ref handleSocket);
+                                break;
+                            case "login":
+                                json = Worker.GetJsonFromRequest(ref request);
+                                Worker.auth.Login(ref json, ref handleSocket);
+                                break;
+                            case "recovery":
+                                Worker.auth.Recovery(ref request, ref handleSocket);
+                                break;
+                            case "newpassword":
+                            case "newpass":
+                                json = Worker.GetJsonFromRequest(ref request);
+                                Worker.auth.ChangePassword(ref json, ref handleSocket);
+                                break;
+                            case "account/delete":
+                                Worker.auth.DeleteAccount(ref request, ref handleSocket);
+                                break;
+                            case "upload":
+                                Worker.upload.UploadBuild(ref request, ref buffer, ref bytes, ref handleSocket);
+                                break;
+                            case "app/delete":
+                                Worker.upload.DeleteApp(ref request, ref handleSocket);
+                                break;
+                            default:
+                                HttpErrorUrl(ref handleSocket);
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        HttpErrorUrl(ref handleSocket);
                     }
                     break;
                 case "OPTIONS": HttpOptions(ref handleSocket);
@@ -149,17 +146,32 @@ namespace Common
         }
         public static void HandleGetRequest(ref string request,ref Socket handleSocket)
         {
-            switch (FindURLRequest(ref request, "GET").ToLower())
+            string url = FindURLRequest(ref request, "GET");
+            if (url != null)
             {
-                case "logs":
-                    HttpLogs(ref handleSocket);
-                    break;
-                case "UpdateState":
-                    Worker.auth.UpdateAccountState(ref request, ref handleSocket);
-                    break;
-                default:
-                    HttpErrorUrl(ref handleSocket);
-                    break;
+                url = url.ToLower();
+                switch (url)
+                {
+                    case "logs":
+                        HttpLogs(ref handleSocket);
+                        break;
+                    case "updatestate":
+                        Worker.auth.UpdateAccountState(ref request, ref handleSocket);
+                        break;
+                    case "app":
+                        Worker.upload.SelectApp(ref request, ref handleSocket);
+                        break;
+                    case "app/select_all":
+                        Worker.upload.SelectMassApps(ref request, ref handleSocket);
+                        break;
+                    default:
+                        HttpErrorUrl(ref handleSocket);
+                        break;
+                }
+            }
+            else
+            {
+                HttpErrorUrl(ref handleSocket);
             }
         }
         /// <summary>
@@ -202,29 +214,19 @@ namespace Common
         {
             if (!string.IsNullOrEmpty(request))
             {
-                if (request.Length < 20)
+                if (request.Length < 10)
                 {
                     Logger.WriteLog("Can not define method of request, input request have not enough characters, function GetMethodRequest()", LogLevel.Error);
                     return null;
                 }
-                string requestMethod = request.Substring(0, 20);
-                for (int i = 0; i < methods.Length; i++)
+                for (int i = 0; i < 10; i++)
                 {
-                    if (requestMethod.Contains(methods[i]))
+                    if (request[i] == '\t' || request[i] == ' ')
                     {
-                        string method = request.Substring(0, methods[i].Length);
-                        if (method == methods[i])
-                        {
-                            return method;
-                        }
-                        else
-                        {
-                            Logger.WriteLog("Can not define method of request, function GetMethodRequest()", LogLevel.Error);
-                            return null;
-                        }
+                        return request.Substring(0, i);
                     }
                 }
-                Logger.WriteLog("Can not define method of request, request does not contains available methods, function GetMethodRequest()", LogLevel.Error);
+                Logger.WriteLog("Can not define method of request, request does not contains tab or space, function GetMethodRequest()", LogLevel.Error);
                 return null;
             }
             else

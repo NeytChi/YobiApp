@@ -17,7 +17,7 @@ namespace Common.Functional.Mail
         {
             this.ip = Config.GetConfigValue("ip", TypeCode.String);
             this.mailAddress = Config.GetConfigValue("mail_address", TypeCode.String);
-            this.mailPassword = Config.GetConfigValue("mail_password", TypeCode.Single);
+            this.mailPassword = Config.GetConfigValue("mail_password", TypeCode.String);
             if (ip != null && mailAddress != null)
             {
                 hostMail = new MailboxAddress(ip, mailAddress);
@@ -40,7 +40,7 @@ namespace Common.Functional.Mail
                     client.Connect(GmailServer, GmailPort, false);
                     client.Authenticate(hostMail.Address, mailPassword);
                     client.Send(emailMessage);
-                    client.DisconnectAsync(true);
+                    client.Disconnect(true);
                     Logger.WriteLog("Send message to " + emailAddress, LogLevel.Usual);
                 }
             }

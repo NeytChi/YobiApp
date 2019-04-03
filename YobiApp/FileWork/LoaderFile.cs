@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+using Common;
 using System.IO;
 using System.Text;
-using System.Text.RegularExpressions;
-using Common;
+using System.Diagnostics;
 using Common.NDatabase.FileData;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace YobiApp.Functional.FileWork
 {
@@ -13,7 +13,7 @@ namespace YobiApp.Functional.FileWork
     {
         private static Random random = new Random();
         public static string CurrentDirectory = Directory.GetCurrentDirectory();
-        public static string PathToFiles = "/Files/";
+        public static string PathToFiles = "/files/";
         private static Regex ContentDispositionPattern = new Regex("Content-Disposition: form-data;" +
                                                             " name=\"(.*)\"; filename=\"(.*)\"\r\n" +
                                                             "Content-Type: (.*)\r\n\r\n", RegexOptions.Compiled);
@@ -69,7 +69,8 @@ namespace YobiApp.Functional.FileWork
                     if (fileBuffer != null)
                     {
                         FileD file = CreateFileByInfo(ref disposition);
-                        CreateFileBinary(ref file.file_name, ref file.file_path, ref fileBuffer);
+                        file.buffer = fileBuffer;
+                        //CreateFileBinary(ref file.file_name, ref file.file_path, ref fileBuffer);
                         files.Add(file);
                     }
                     else
@@ -80,7 +81,7 @@ namespace YobiApp.Functional.FileWork
             }
             else
             {
-                Logger.WriteLog("Request doesnot has required request fields.", LogLevel.Error);
+                Logger.WriteLog("Request does not has required request fields.", LogLevel.Error);
                 return null;
             }
             Logger.WriteLog("Get files from request. From request loaded " + files.Count + " file(s).", LogLevel.Error);
@@ -150,11 +151,11 @@ namespace YobiApp.Functional.FileWork
             file.file_type = GetFileType(disposition.Value);
             file.file_last_name = GetFileName(disposition.Value);
             file.file_name = random.Next(0, 2146567890).ToString();
-            file.file_path = GetPathFromExtention(file.file_extension);
+            file.file_path = GetPathFromType(file.file_type);
             Logger.WriteLog("Create file info by disposition.", LogLevel.Usual);
             return file;
         }
-        public static string GetPathFromExtention(string extention)
+        public static string GetPathFromType(string extention)
         {
             switch (extention)
             {
@@ -168,8 +169,8 @@ namespace YobiApp.Functional.FileWork
                     Directory.CreateDirectory(CurrentDirectory + PathToFiles + DailyDirectory + "Audios/");
                     return PathToFiles + DailyDirectory + "Audios/";
                 case "application":
-                    Directory.CreateDirectory(CurrentDirectory + PathToFiles + DailyDirectory + "Uploads/");
-                    return PathToFiles + DailyDirectory + "Uploads/";
+                    Directory.CreateDirectory(CurrentDirectory + PathToFiles + DailyDirectory + "Upload/");
+                    return PathToFiles + DailyDirectory + "Upload/";
                 default:
                     return PathToFiles;
             }
@@ -213,6 +214,7 @@ namespace YobiApp.Functional.FileWork
         }
         public static string GetFileName(string disposition)
         {
+            Console.WriteLine(disposition);
             int first, end;
             first = disposition.IndexOf("filename=\"", StringComparison.Ordinal);
             if (first == -1)
@@ -228,7 +230,7 @@ namespace YobiApp.Functional.FileWork
                 return null;
             }
             string filename = disposition.Substring(first, (end - first));
-            Logger.WriteLog("Get file name from disposition request", LogLevel.Error);
+            Logger.WriteLog("Get file name from disposition request, file_last_name->" + filename, LogLevel.Error);
             return filename;
         }
         public static string GetContentType(string disposition)
@@ -263,7 +265,7 @@ namespace YobiApp.Functional.FileWork
             }
             return contentType;
         }
-        public static bool CreateFileBinary(ref string fileName, ref string pathToSave, ref byte[] byteArray)
+        public static bool CreateFileBinary(string fileName, string pathToSave, ref byte[] byteArray)
         {
             try
             {
@@ -273,6 +275,25 @@ namespace YobiApp.Functional.FileWork
                     fileStream.Close();
                 }
                 Logger.WriteLog("Get file from request. File name " + fileName, LogLevel.Usual);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error in function CreateFileBinary, Message: " + e.Message);
+                Logger.WriteLog("Error in function CreateFileBinary, Message: " + e.Message, LogLevel.Error);
+                return false;
+            }
+        }
+        public static bool CreateFileBinary(string FullPath, ref byte[] byteArray)
+        {
+            try
+            {
+                using (Stream fileStream = new FileStream(FullPath, FileMode.Create, FileAccess.Write))
+                {
+                    fileStream.Write(byteArray, 0, byteArray.Length);
+                    fileStream.Close();
+                }
+                Logger.WriteLog("Get file from request. File name " + FullPath, LogLevel.Usual);
                 return true;
             }
             catch (Exception e)

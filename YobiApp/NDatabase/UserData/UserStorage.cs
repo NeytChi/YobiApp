@@ -8,16 +8,14 @@ namespace YobiApp.NDatabase.UserData
         public string table = "CREATE TABLE IF NOT EXISTS users" +
         "(" +
             "user_id int AUTO_INCREMENT," +
-            "user_state varchar(256)," +
-            "user_email varchar(20) NOT NULL," +
-            "user_password varchar(20) NOT NULL," +
+            "user_state SMALLINT," +
+            "user_email varchar(100) NOT NULL," +
+            "user_password varchar(256) NOT NULL," +
             "user_hash varchar(100)," +
             "created_at int," +
             "PRIMARY KEY (user_id)" +
         ")";
         public string table_name = "users";
-
-        private string insert = "INSERT INTO users(user_state, user_email, user_password, user_hash, created_at) VALUES(@user_state, @user_email, @user_password, @user_hash, @created_at);";
 
         public UserStorage(MySqlConnection connection, object locker)
         {
@@ -26,10 +24,14 @@ namespace YobiApp.NDatabase.UserData
             SetTable(table);
             SetTableName(table_name);
         }
-
         public UserCache Add(UserCache user)
         {
-            using (MySqlCommand commandSQL = new MySqlCommand(insert, connection))
+            using (MySqlCommand commandSQL = new MySqlCommand("INSERT INTO users" +
+        	"(" +
+        	"user_state, user_email, user_password, user_hash, created_at) " +
+        	"VALUES(@user_state, @user_email, @user_password, @user_hash, @created_at" +
+        	");",
+            connection))
             {
                 lock (locker)
                 {

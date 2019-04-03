@@ -35,21 +35,25 @@ namespace YobiApp.Functional.RegLogin
             {
                 Logger.WriteLog("Validation email account - false", LogLevel.Usual);
                 Worker.JsonAnswer(false, "Validation email - false", ref handleSocket);
+                return;
             }
             else if (!Validator.ValidatePassword(password))
             {
                 Logger.WriteLog("Validation password account - false", LogLevel.Usual);
                 Worker.JsonAnswer(false, "Validation password - false", ref handleSocket);
+                return;
             }
             else if (!Validator.EqualsPasswords(password, confirmPassword))
             {
                 Logger.WriteLog("Validation confirm password account - false", LogLevel.Usual);
                 Worker.JsonAnswer(false, "Validation confirm password - false", ref handleSocket);
+                return;
             }
             else if (Database.user.SelectEmail(email) != null)
             {
                 Logger.WriteLog("Verification account - false, account is exist now", LogLevel.Usual);
                 Worker.JsonAnswer(false, "Verification account - false, account is exist now.", ref handleSocket);
+                return;
             }
             UserCache user = new UserCache();
             user.user_hash = GenerateRandomHash(100);
@@ -58,12 +62,15 @@ namespace YobiApp.Functional.RegLogin
             user.created_at = (int)(DateTime.UtcNow - Worker.unixed).TotalSeconds;
             Database.user.Add(user);
             Logger.WriteLog("Registrate user with email =" + email, LogLevel.Usual);
-            Worker.mail.SendEmail(email, "Activation account", "Your registration url:\r\nhttp://" + Server.ip + ":" + Server.port + "/UpdateState/?confirm_hash=" + user.user_hash);
             Worker.JsonAnswer(true, "User with email =" + email + " successfully registered. Message sent to email.", ref handleSocket);
+            Worker.mail.SendEmail(email, "Activation account", "Your registration url:\r\nhttp://" + Server.ip + ":" + Server.port + "/UpdateState/?confirm_hash=" + user.user_hash);
         }
         public void Login(ref JObject json, ref Socket handleSocket)
         {
-            if (json == null) { return; }
+            if (json == null) 
+            { 
+                return; 
+            }
             string email = Worker.CheckRequiredJsonField(ref json, "email", JTokenType.String, ref handleSocket);
             if (email == null) return;
             string password = Worker.CheckRequiredJsonField(ref json, "password", JTokenType.String, ref handleSocket);
@@ -72,22 +79,26 @@ namespace YobiApp.Functional.RegLogin
             {
                 Logger.WriteLog("Validation email account - false", LogLevel.Usual);
                 Worker.JsonAnswer(false, "Validation email account - false", ref handleSocket);
+                return;
             }
             UserCache user = Database.user.SelectEmail(email);
             if (user == null)
             {
                 Logger.WriteLog("Verification account - false, account is not exist now", LogLevel.Usual);
                 Worker.JsonAnswer(false, "Account is not exist yet, email -" + email, ref handleSocket);
+                return;
             }
             else if (user.user_state == 0)
             {
                 Logger.WriteLog("Verification account - false, account doens't have active state", LogLevel.Usual);
                 Worker.JsonAnswer(false, "Verification account - false, account is not activated", ref handleSocket);
+                return;
             }
             else if (!Validator.VerifyHashedPassword(user.user_password, password))
             {
                 Logger.WriteLog("Verification account - false, wrong password", LogLevel.Usual);
                 Worker.JsonAnswer(false, "Verification account - false, wrong password", ref handleSocket);
+                return;
             }
             else
             {
@@ -111,23 +122,32 @@ namespace YobiApp.Functional.RegLogin
             UserCache user = Database.user.SelectId(user_id);
             if (user == null)
             {
-                Logger.WriteLog("Verification account - false, can not find id account", LogLevel.Usual);
-                Worker.JsonAnswer(false, "Verification account - false, can not find id account", ref handleSocket);
+                Logger.WriteLog("Verification account - false, can not find id account.", LogLevel.Usual);
+                Worker.JsonAnswer(false, "Verification account - false, can not user by insert user_id.", ref handleSocket);
+                return;
+            }
+            else if (!Validator.VerifyHashedPassword(user.user_password, old_password))
+            {
+                Logger.WriteLog("Old password don't equals to user password.", LogLevel.Usual);
+                Worker.JsonAnswer(false, "Old password don't equals to user password.", ref handleSocket);
+                return;
             }
             else if (!Validator.ValidatePassword(new_password))
             {
-                Logger.WriteLog("Validation new password account - false", LogLevel.Usual);
-                Worker.JsonAnswer(false, "Validation password - false", ref handleSocket);
+                Logger.WriteLog("Validation new password account - false.", LogLevel.Usual);
+                Worker.JsonAnswer(false, "Validation password - false.", ref handleSocket);
+                return;
             }
             else if (!Validator.EqualsPasswords(new_password, confirm_new_password))
             {
-                Logger.WriteLog("Validation confirm password account - false", LogLevel.Usual);
-                Worker.JsonAnswer(false, "Validation confirm password - false", ref handleSocket);
+                Logger.WriteLog("Validation confirm password account - false.", LogLevel.Usual);
+                Worker.JsonAnswer(false, "Validation confirm password - false.", ref handleSocket);
+                return;
             }
             else
             {
                 Database.user.UpdatePassword(user.user_id, Validator.HashPassword(new_password));
-                Worker.JsonAnswer(true, "New password was successfully updated", ref handleSocket);
+                Worker.JsonAnswer(true, "New password was successfully updated.", ref handleSocket);
             }
         }
         public void Recovery(ref string request, ref Socket handleSocket)
@@ -136,24 +156,28 @@ namespace YobiApp.Functional.RegLogin
             if (email == null)
             {
                 Worker.JsonAnswer(false, "Can not find email address in request params", ref handleSocket);
+                return;
             }
             if (!Validator.ValidateEmail(email))
             {
                 Logger.WriteLog("Validation email account - false", LogLevel.Usual);
                 Worker.JsonAnswer(false, "Validation email - false", ref handleSocket);
+                return;
             }
             UserCache user = Database.user.SelectEmail(email);
             if (user != null)
             {
                 string new_password = Validator.GenerateHash();
                 Database.user.UpdatePassword(user.user_id, Validator.HashPassword(new_password));
-                Worker.mail.SendEmail(email, "Recovery password", "Recovery password. New password:" + new_password);
                 Worker.JsonAnswer(true, "Send message to email=" + email + "", ref handleSocket);
+                Worker.mail.SendEmail(email, "Recovery password", "Recovery password. New password:" + new_password);
+                return;
             }
             else
             {
                 Logger.WriteLog("Verification account - false, account is not exist.", LogLevel.Usual);
                 Worker.JsonAnswer(false, "Account is not exist yet, email -" + email, ref handleSocket);
+                return;
             }
         }
         public void DeleteAccount(ref string request, ref Socket handleSocket)
@@ -163,7 +187,8 @@ namespace YobiApp.Functional.RegLogin
             if (user == null)
             {
                 Logger.WriteLog("Get account by id - false.", LogLevel.Usual);
-                Worker.JsonAnswer(false , "Unknown receided id", ref handleSocket);
+                Worker.JsonAnswer(false , "Unknown receided user_id", ref handleSocket);
+                return;
             }
             List<App> apps = Database.app.SelectByUserId(user_id);
             if (apps != null)
@@ -183,20 +208,23 @@ namespace YobiApp.Functional.RegLogin
             string confirm_hash = Worker.FindParamFromRequest(ref request, "confirm_hash", TypeCode.String);
             if (confirm_hash == null)
             {
-                Logger.WriteLog("Can't get confirm hash from request", LogLevel.Error);
-                Worker.JsonAnswer(false, "Can't get confirm hash from request", ref handleSocket);
+                Logger.WriteLog("Can't get confirm hash from request.", LogLevel.Error);
+                Worker.JsonAnswer(false, "Can't get confirm hash from request.", ref handleSocket);
+                return;
             }
             UserCache user = Database.user.SelectHash(confirm_hash);
             if (user == null)
             {
                 Logger.WriteLog("Get account by user_id - false.", LogLevel.Error);
-                Worker.JsonAnswer(false, "Unknown receided user_id", ref handleSocket);
+                Worker.JsonAnswer(false, "Unknown receided data.", ref handleSocket);
+                return;
             }
             else
             {
                 Database.user.UpdateState(user.user_id);
-                Logger.WriteLog("User state update, user_id->" + user.user_id, LogLevel.Usual);
+                Logger.WriteLog("User state update, user_id->" + user.user_id + ".", LogLevel.Usual);
                 Worker.JsonAnswer(true, "User state was successfully update.", ref handleSocket);
+                return;
             }
         }
         private string GenerateRandomHash(int length)

@@ -1,29 +1,13 @@
 ﻿<Properties StartupConfiguration="{D162ADCE-34BC-4F3C-9268-ADE79FE411E8}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="YobiApp/Server.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="YobiApp/Functional/Authorization/Authorization.cs">
     <Files>
-      <File FileName="YobiApp/FileWork/LoaderFile.cs" Line="15" Column="33" />
-      <File FileName="YobiApp/Functional/Authorization/Authorization.cs" Line="16" Column="71" />
-      <File FileName="YobiApp/Functional/Upload/UploadF.cs" Line="14" Column="23" />
-      <File FileName="YobiApp/Worker.cs" Line="72" Column="10" />
-      <File FileName="YobiApp/Server.cs" Line="5" Column="24" />
+      <File FileName="YobiApp/NDatabase/UserData/UserStorage.cs" Line="96" Column="18" />
+      <File FileName="YobiApp/Functional/Authorization/Authorization.cs" Line="1" Column="1" />
     </Files>
-    <Pads>
-      <Pad Id="ProjectPad">
-        <State name="__root__">
-          <Node name="YobiApp" expanded="True">
-            <Node name="YobiApp" expanded="True">
-              <Node name="Server.cs" selected="True" />
-            </Node>
-          </Node>
-        </State>
-      </Pad>
-    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.ItemProperties.YobiApp PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.DebuggingService.PinnedWatches>
-    <Watch file="../../../../Skeleton/Skeleton/Server.cs" line="55" offsetX="578" offsetY="972" expression="url" liveUpdate="False" />
-  </MonoDevelop.Ide.DebuggingService.PinnedWatches>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Release|x86" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>

@@ -26,6 +26,7 @@ namespace Common
                         Logger.ReadStringLogs();
                         break;
                     case "-c":
+                        Database.DropTables();
                         break;
                     case "-h":
                     case "-help":
@@ -54,7 +55,10 @@ namespace Common
                 "Helps contains 5 modes of the server that cound be used."
             };
             Console.WriteLine();
-            for (int i = 0; i < commands.Length; i++) { Console.WriteLine(commands[i] + "\t - " + description[i]); }
+            for (int i = 0; i < commands.Length; i++) 
+            { 
+                Console.WriteLine(commands[i] + "\t - " + description[i]); 
+            }
         }
     }
 }

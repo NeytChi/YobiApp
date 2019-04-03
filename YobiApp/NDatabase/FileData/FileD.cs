@@ -8,5 +8,6 @@
         public string file_type;
         public string file_extension;
         public string file_last_name;
+        public byte[] buffer;
     }
 }
