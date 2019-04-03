@@ -1,0 +1,7 @@
+/home/neytchi/Projects/YobiApp/YobiApp/obj/x86/Release/.NETFramework,Version=v4.7.AssemblyAttribute.cs
+/home/neytchi/Projects/YobiApp/YobiApp/bin/Release/YobiApp.exe
+/home/neytchi/Projects/YobiApp/YobiApp/obj/x86/Release/YobiApp.exe
+/home/neytchi/Projects/YobiApp/YobiApp/bin/Release/Newtonsoft.Json.dll
+/home/neytchi/Projects/YobiApp/YobiApp/bin/Release/FluentScheduler.dll
+/home/neytchi/Projects/YobiApp/YobiApp/bin/Release/MySql.Data.dll
+/home/neytchi/Projects/YobiApp/YobiApp/bin/Release/Google.Protobuf.dll

@@ -1,0 +1,7 @@
+{
+	"ip" : "127.0.0.1",
+	"domen" : "gbt.yobidev.com",
+	"port" : 8000,
+	"ssl_path" : "/home/neytchi/Projects/YobiApp/YobiApp/bin/Release",
+	"ssl_domen" : "yobidev.com"
+}

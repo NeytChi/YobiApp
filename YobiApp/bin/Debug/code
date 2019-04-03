@@ -1,0 +1,232 @@
+private string registration(string request)
+        {
+            JObject json = GetJsonFromRequest(request);
+			if (json == null) { return successFalse; }
+			if (!json.ContainsKey("type_registration")) return successFalse; 
+			if (json.GetValue("type_registration").ToString() == "email")
+            {
+                return handleRegEmail(json);
+            }
+			else if (json.GetValue("type_registration").ToString() == "social")
+            {
+                return handleRegSocial(json);
+            }
+            else return successFalse;        
+        }
+        private string authorization(string request) 
+        {         
+            JObject json = GetJsonFromRequest(request);
+			if (!json.ContainsKey("type_auth")) return successFalse;
+            if (json.GetValue("type_auth").ToString() == "email")
+            {
+                string answerEmailReg = handleLoginEmail(json);
+                return answerEmailReg;
+            }
+            else if (json.GetValue("type_auth").ToString() == "social")
+            {
+                string answerSocialReg = handleLoginSocial(json);
+                return answerSocialReg;
+            }
+            else return successFalse;            
+        }
+        private string handleLoginSocial(JObject json) 
+        {
+            if (!json.ContainsKey("social")) return successFalse;
+            string jsonSocial = json.GetValue("social").ToString();
+            switch (jsonSocial)
+            {
+                case "facebook":
+					return authAccountFB(json.GetValue("access_token").ToString());
+                case "twitter":
+					return authAccountTwitter(json);
+                default:
+                    return successFalse;
+            }
+        }
+		private string handleLoginEmail(JObject json)
+		{
+			if (!json.ContainsKey("email")) return successFalse;
+			if (!json.ContainsKey("password")) return successFalse;
+            string jsonEmail = json.GetValue("email").ToString();
+			string jsonPassword = json.GetValue("password").ToString();
+			if (validator.validateEmail(jsonEmail) == false)
+			{
+				loger.writeLog("Validation email account - false", "email");
+				return "{ \r\n \"success\" : \"false\" ,\r\n \"validation\" : \"false\"}";
+			}
+			else if (validator.validatePassword(jsonPassword) == false)
+			{
+				loger.writeLog("Validation password account - false", "email");
+				return "{ \r\n \"success\" : \"false\" ,\r\n  \"validation\" : \"false\" \r\n}";
+			}
+			else
+			{
+				Account account = dB.selectUserAccount(jsonEmail);
+				if (account == null)
+				{
+					loger.writeLog("Verification account - false, account is not exist now", "email");
+					return "{ \"success\":\"false\", \r\n \"account_exist\":\"false\", \r\n\"email\":\"" + jsonEmail + "\"}";
+				}
+				else if (account.State == "false")
+				{
+					loger.writeLog("Verification account - false, account doens't have active state", "email");
+					return "{ \"success\":\"false\", \r\n \"account_state\":\"false\"}";
+				}
+				else if (account.Password != jsonPassword)
+				{
+					loger.writeLog("Verification account - false, not valid password", "email");
+					return "{ \"success\":\"false\", \r\n \"password\":\"false\"}";
+				}
+				else
+				{
+					loger.writeLog("Verification account - true, account is exist", "email");
+					return authClass.generateAccountJson(account, "\"success\":\"true\", \r\n \"message\":\"login\" ");
+				}
+			}
+		}
+        private string handleRegEmail(JObject json) 
+        {
+            if (json.ContainsKey("email") && json.ContainsKey("password") && json.ContainsKey("confirm_password"))
+            {
+                string jsonEmail = json.GetValue("email").ToString();
+                string jsonPassword = json.GetValue("password").ToString();
+                string jsonConfirmPass = json.GetValue("confirm_password").ToString();
+                if (validator.validateEmail(jsonEmail) == false)
+                {
+                    loger.writeLog("Validation email account - false", "email");
+					return "{ \r\n \"success\" : \"false\" ,\r\n \"validation\" : \"false\"}";
+                }
+                else if (validator.validatePassword(jsonPassword) == false)
+                {
+                    loger.writeLog("Validation password account - false", "email");
+                    return "{ \r\n \"success\" : \"false\" ,\r\n \"validation\" : \"false\"}";
+                }
+                else if (validator.equalsPasswords(jsonPassword, jsonConfirmPass) == false)
+                {
+                    loger.writeLog("Validation confirm password account - false", "email");
+                    return "{ \r\n \"success\" : \"false\" ,\r\n \"validation\" : \"false\"}";
+                }
+                else if (dB.existUserEmailAccount(jsonEmail) == true)
+                {
+                    loger.writeLog("Verification account - false, account is exist now", "email");
+                    return "{ \"success\":\"false\" , \r\n\"email\" : \"" + jsonEmail + "\" ,\r\n \"account_exist\" : \"true\"}";
+                }
+                else
+                {
+                    return setEmailInDB(jsonEmail, jsonPassword);
+                }
+            }
+            else return successFalse;
+        }
+        private string setEmailInDB(string email, string pass)
+        {
+            string id = authClass.generateId();
+            Account account = new Account();
+            account.Id = id;
+            account.Email = email;
+            account.Password = pass;
+            account.State = "false";
+            dB.addUserAccount(account);
+            string messageURL = string.Format("http://"+ ip + ":" + port + "/Registration/?user_id={0}", id);
+            mail.SendEmailAsync(email, "Registration_Message", messageURL);
+            loger.writeLog("Send registration id message to id=" + id , "error");
+            return "{ \"message_sent\" : \"true\" ,\r\n \"success\" : \"true\" , \"email\" : \"" + email + "\"\r\n  }";
+        }
+		private string handleRegSocial(JObject json)
+		{
+			if (!json.ContainsKey("social")) return successFalse;
+            string jsonSocial = json.GetValue("social").ToString();
+			switch (jsonSocial)
+			{
+				case "facebook":
+					string jsonToken = json.GetValue("access_token").ToString();
+					return authAccountFB(jsonToken);
+				case "twitter":
+					return authAccountTwitter(json);               
+				default:
+					return successFalse;
+			}
+		}
+        private string authAccountTwitter(JObject json) 
+        {
+			if (!json.ContainsKey("access_token")) return successFalse;
+			if (!json.ContainsKey("access_token_secret")) return successFalse;
+            string responseTwitter = authClass.GetUserJsonFromTwitter(json.GetValue("access_token").ToString(), json.GetValue("access_token_secret").ToString());
+			if (responseTwitter == "") return successFalse;
+			JObject responce = GetJObjectFromRequest(responseTwitter);
+            if (responce == null)
+			{
+				loger.writeLog("Authorization Twitter account - false", "error");
+                return successFalse;
+			}
+            Account account = authClass.setObjectTwitterAccount(responce, json.GetValue("access_token").ToString(), json.GetValue("access_token_secret").ToString());
+            if (account == null)
+			{
+				loger.writeLog("Authorization Twitter account - false", "error");
+                return successFalse;
+			}
+            if (dB.existUserAccount(account.Id) == true)
+            {
+                loger.writeLog("Authorization Twitter account - true", "auth");
+                return authClass.generateAccountJson(account, "\"success\" : \"true\" , \r\n \"account\" : \"exist\"");
+            }
+            else
+            {
+                dB.addUserAccount(account);
+                loger.writeLog("Authorization Twitter account - true", "auth");
+                return authClass.generateAccountJson(account, "\"success\" : \"true\" , \r\n \"message\" : \"registration\"");
+            }                  
+        }
+		private string authAccountFB(string accessToken)
+		{
+			Account account = authClass.GetUserDetailsFromFB(accessToken);
+			if (account == null)
+			{
+                loger.writeLog("Authorization FaceBook account - false", "error");
+                return successFalse;
+            }
+            loger.writeLog("Authorization Facebook account - true", "auth");
+			if (dB.existUserAccount(account.Id) == true)
+			{
+				return authClass.generateAccountJson(account, "\"account\" : \"exist\", \r\n\"success\":\"true\"");
+			}
+			else
+			{
+				dB.addUserAccount(account);
+				return authClass.generateAccountJson(account, "\"success\" : \"true\" , \r\n \"registration\" : \"true\"");
+			}
+		}
+		private string authAccountLinkedIn(string accessToken)
+		{
+			Account account = authClass.GetUserDetailsFromLI(accessToken);
+			if (account == null) return successFalse;
+            if (dB.existUserAccount(account.Id) == true)
+			{
+				return authClass.generateAccountJson(account, "\"account\" : \"exist\", \r\n\"success\":\"true\"");
+			}
+			else
+			{
+				loger.writeLog("Authorization LinkedIn account - true.", "email");
+				return authClass.generateAccountJson(account, "\"success\" : \"true\" , \r\n \"registration\" : \"true\"");
+			}         
+		}
+        public string CheckEmailState(string request)
+        {
+            string id = FindParamFromRequest(request, "id");
+            if (id == "" && ConvertSaveString(id) == -1)
+            {
+                return SuccessFalseWithMessage("Can not find param 'id' in request");
+            }
+            Account account = dB.SelectAccountId(Convert.ToInt32(id));
+            if (account == null)
+            {
+                loger.writeLog("Get account by id - false.", "worker");
+                return SuccessFalseWithMessage("Unknown receided id");
+            }
+            else
+            {
+                dB.UpdateAccountState(account.Id);
+                loger.writeLog("Active account by email. Id=" + account.Id, "email");
+                return GenerateAccountJson(account);
+            }
+        }

@@ -1,0 +1,9 @@
+{
+	"ip" : "127.0.0.1",
+	"domen" : "(none)",
+	"port" : 8000,
+	"ssl_path" : "/home/neytchi",
+	"ssl_domen" : "yobidev.com",
+	"mail_address" : "test6574839210@gmail.com", 
+	"mail_password" : "GmailPassword1234"
+}
